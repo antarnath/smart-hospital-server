@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_b@%+#k_3zg0tt$m@e*ckvy$*e!y+!m*re3=orbi5+vs_&z$7p'
+SECRET_KEY = 'django-insecure-!-0e_*$#*^+$wc493ia6_p2*1!p+@_344&zc)u9+pm880!-ygy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +53,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'hospital.urls'
+
+AUTH_USER_MODEL = 'accounts.User'
 
 TEMPLATES = [
     {
@@ -121,3 +126,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+EMAIL_PORT = '2525'
+EMAIL_USE_TLS = True
