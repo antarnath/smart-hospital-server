@@ -1,5 +1,12 @@
 from rest_framework import serializers
 from .models import *
+from django.contrib.auth import authenticate
+from rest_framework.exceptions import AuthenticationFailed
+from django.utils.encoding import smart_bytes, smart_str, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
 
 
 class UserRegisterSerializers(serializers.ModelSerializer):
@@ -27,3 +34,55 @@ class UserRegisterSerializers(serializers.ModelSerializer):
     user.set_password(password)
     user.save()
     return user
+  
+class LoginSerializer(serializers.ModelSerializer):
+  email = serializers.EmailField(max_length=255, min_length=6)
+  password = serializers.CharField(max_length=65, write_only=True)
+  full_name = serializers.CharField(max_length=255, read_only=True)
+  access_token = serializers.CharField(max_length=255, read_only=True)
+  
+  class Meta:
+    model = User
+    fields = ['email', 'password', 'full_name', 'access_token']
+  
+  def validate(self, attrs):
+    email = attrs.get('email')
+    password = attrs.get('password')
+    request = self.context.get('request')
+    user = authenticate(request, email=email, password=password)
+    if not user:
+      raise AuthenticationFailed('Email or Password is incorrect')
+    if not user.is_verified:
+      raise AuthenticationFailed('Account is not verified')
+    user_tokens = user.tokens()
+    
+    return {
+      'email': user.email,
+      'full_name': user.get_full_name,
+      'access_token': str(user_tokens['access'])
+    }
+
+class PasswordResetRequestSerializer(serializers.ModelSerializer):
+  email = serializers.EmailField(max_length=255, min_length=6)
+  
+  class Meta:
+    model = User
+    fields = ['email']
+    
+    def validate(self, attrs):
+      email = attrs.get('email')
+      if User.objects.filter(email=email).exists():
+        user = User.objects.get(email=email)
+        uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+        token = PasswordResetTokenGenerator().make_token(user)
+        request = self.context.get('request')
+        current_site = get_current_site(request).domain
+        relative_link = reverse('password-reset-confirm', kwargs={'uidb64': uidb64, 'token': token})
+        abslink = f"http://{current_site}{relative_link}"
+        print("============abslink============\n", abslink)
+        email_body = f"Hi {user.first_name} use the link below to reset your password \n {abslink}"
+        data = {
+          'email_body': email_body,
+          'email_subject': 'Reset your password',
+          'to_email': user.email
+        }

@@ -5,6 +5,10 @@ from rest_framework import status
 from rest_framework.response import Response
 from .models import *
 from .utils import send_code_to_user
+from rest_framework.permissions import IsAuthenticated
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import smart_bytes, smart_str, DjangoUnicodeDecodeError
 
 
 class RegisterUser(GenericAPIView):
@@ -43,4 +47,49 @@ class VerifyUserEmail(GenericAPIView):
     else:
       return Response({
         'message': 'Invalid OTP'
+      }, status=status.HTTP_400_BAD_REQUEST)
+      
+class LoginUser(GenericAPIView):
+  serializer_class = LoginSerializer
+  
+  def post(self, request):
+    serializer = self.get_serializer(data=request.data)
+    if serializer.is_valid():
+      return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
+class UserProfile(GenericAPIView):
+  permission_classes = [IsAuthenticated]
+  
+  def get(self, request):
+    return Response({
+      'message': 'User Profile Page'
+    }, status=status.HTTP_200_OK)
+    
+class PasswordResetRequest(GenericAPIView):
+  serializer_class = PasswordResetRequestSerializer
+  
+  def post(self, request):
+    serializer = self.get_serializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    return Response({
+      'message': 'Password reset link sent to your email'
+    }, status=status.HTTP_200_OK)
+    
+    
+class PasswordResetConfirm(GenericAPIView):
+  def get(self, request, uidb64, token):
+    try:
+      user_id = smart_bytes(urlsafe_base64_decode(uidb64))
+      user = User.objects.get(id=user_id)
+      if not PasswordResetTokenGenerator().check_token(user, token):
+        return Response({
+          'message': 'This link is invalid. Please try again'
+        }, status=status.HTTP_400_BAD_REQUEST)
+      return Response({
+        'message': 'Credentials Valid',
+      }, status=status.HTTP_200_OK)
+    except DjangoUnicodeDecodeError as identifier:
+      return Response({
+        'message': 'Invalid link'
       }, status=status.HTTP_400_BAD_REQUEST)

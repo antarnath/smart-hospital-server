@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from .manager import UserManager
-# from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 AUTH_PROVIDERS = {'email': 'email', 'google': 'google', 'facebook': 'facebook', 'twitter': 'twitter', 'github': 'github', 'apple': 'apple'}
@@ -35,6 +35,12 @@ class User(AbstractBaseUser, PermissionsMixin):
   def get_full_name(self):
     return f'{self.first_name} {self.last_name}'
   
+  def tokens(self):
+    refresh = RefreshToken.for_user(self)
+    return {
+      'refresh': str(refresh),
+      'access': str(refresh.access_token)
+    }
   
 class OneTimePassword(models.Model):
   user = models.OneToOneField(User, on_delete=models.CASCADE)
