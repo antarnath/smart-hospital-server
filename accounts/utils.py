@@ -34,3 +34,4 @@ def send_normal_email(data):
     from_email=settings.DEFAULT_FROM_EMAIL,
     to=[data['to_email']]
   )
+  email.send()
