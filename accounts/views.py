@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from .serializers import *
 from rest_framework import status
 from rest_framework.response import Response
@@ -22,7 +22,7 @@ class RegisterUser(GenericAPIView):
       # send One Time Password to user email
       send_code_to_user(user['email'])
       return Response({
-        'user': user,
+        'email': user['email'],   
         'message': f'hi {user["first_name"]}, please check your email for the OTP'
       }, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -60,19 +60,24 @@ class LoginUser(GenericAPIView):
   
 class UserProfile(GenericAPIView):
   permission_classes = [IsAuthenticated]
-  
+  serializer_class = UserProfileSerializer
+
   def get(self, request):
-    return Response({
-      'message': 'User Profile Page'
-    }, status=status.HTTP_200_OK)
+      users = request.user
+      serializer = self.get_serializer(users)
+      return Response({
+          'message': 'User Profile Page',
+          'user': serializer.data
+      }, status=status.HTTP_200_OK)
     
-class PasswordResetRequest(GenericAPIView):
+class PasswordResetRequest(GenericAPIView):  
   serializer_class = PasswordResetRequestSerializer
   
   def post(self, request):
     serializer = self.get_serializer(data=request.data, context = {'request': request}) 
     serializer.is_valid(raise_exception=True)
     return Response({
+      'data': serializer.data, 
       'message': 'Password reset link sent to your email'
     }, status=status.HTTP_200_OK)
     
@@ -85,3 +90,5 @@ class PasswordResetConfirm(GenericAPIView):
     return Response({
       'message': 'Password reset successful'
     }, status=status.HTTP_200_OK) 
+    
+    

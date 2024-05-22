@@ -72,7 +72,7 @@ class PasswordResetRequestSerializer(serializers.ModelSerializer):
     fields = ['email']
     
   def validate(self, attrs):
-    email = attrs.get('email')
+    email = attrs.get('email') 
     if User.objects.filter(email=email).exists():
       user = User.objects.get(email=email)
       uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
@@ -88,7 +88,14 @@ class PasswordResetRequestSerializer(serializers.ModelSerializer):
         'to_email': user.email
       }
       send_normal_email(data)
-    return super().validate(attrs)
+      attrs['uidb64'] = uidb64
+      attrs['token'] = token
+    return attrs
+  def to_representation(self, instance):
+    ret = super().to_representation(instance)
+    ret['uidb64'] = self.validated_data.get('uidb64')
+    ret['token'] = self.validated_data.get('token')
+    return ret
   
 class PasswordResetConfirmSerializer(serializers.ModelSerializer):
   password = serializers.CharField(max_length=255, min_length=8, write_only=True)
@@ -111,3 +118,9 @@ class PasswordResetConfirmSerializer(serializers.ModelSerializer):
       return user
     except DjangoUnicodeDecodeError as identifier:
       raise AuthenticationFailed('The reset link is invalid', 401)
+    
+    
+class UserProfileSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = User
+    fields = ['email', 'first_name', 'last_name', 'phone_number']

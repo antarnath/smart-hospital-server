@@ -7,5 +7,5 @@ urlpatterns = [
   path('login/', LoginUser.as_view(), name='login'),
   path('profile/', UserProfile.as_view(), name='profile'), 
   path('password-reset/', PasswordResetRequest.as_view(), name='password-reset'),
-  path('password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirm.as_view(), name='password-reset-confirm')
+  path('password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirm.as_view(), name='password-reset-confirm'),
 ] 
