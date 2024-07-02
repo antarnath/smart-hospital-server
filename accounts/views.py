@@ -82,13 +82,47 @@ class PasswordResetRequest(GenericAPIView):
     }, status=status.HTTP_200_OK)
     
     
+# class PasswordResetConfirm(GenericAPIView):
+#   serializer_class = PasswordResetConfirmSerializer
+#   def patch(self, request, uidb64, token):
+#     serializer = self.get_serializer(data=request.data, context={'request': request, 'uidb64': uidb64, 'token': token})
+#     serializer.is_valid(raise_exception=True)
+#     return Response({
+#       'message': 'Password reset successful'
+#     }, status=status.HTTP_200_OK) 
+    
+    
 class PasswordResetConfirm(GenericAPIView):
-  serializer_class = PasswordResetConfirmSerializer
-  def patch(self, request, uidb64, token):
-    serializer = self.get_serializer(data=request.data, context={'request': request, 'uidb64': uidb64, 'token': token})
-    serializer.is_valid(raise_exception=True)
+  print("====================")
+  print("====================")
+  print("====================")
+  print("====================")
+
+  def get(self, request, uidb64, token):
+    try:
+      user_id = smart_str(urlsafe_base64_decode(uidb64))
+      user = User.objects.get(id=user_id)
+      if not PasswordResetTokenGenerator().check_token(user, token):
+        return Response(
+          {'message': 'Token is invalid or expired. Please request a new one'},
+          status=status.HTTP_400_BAD_REQUEST
+        )
+      return Response(
+        {'success': True, 'message': 'Credentials Valid', 'uidb64': uidb64, 'token': token},
+        status=status.HTTP_200_OK
+      )
+    except DjangoUnicodeDecodeError as identifier:
+      return Response(
+        {'message': 'Token is invalid or expired. Please request a new one'},
+        status=status.HTTP_400_BAD_REQUEST
+      )
+      
+class SetNewPassword(GenericAPIView):
+  serializer_class = SetNewPasswordSerializer
+  
+  def patch(self, request):
+    serializers = self.serializer_class(data=request.data)
+    serializers.is_valid(raise_exception=True)
     return Response({
       'message': 'Password reset successful'
-    }, status=status.HTTP_200_OK) 
-    
-    
+    }, status=status.HTTP_200_OK)
