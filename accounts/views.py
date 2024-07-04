@@ -81,22 +81,9 @@ class PasswordResetRequest(GenericAPIView):
       'message': 'Password reset link sent to your email'
     }, status=status.HTTP_200_OK)
     
-    
-# class PasswordResetConfirm(GenericAPIView):
-#   serializer_class = PasswordResetConfirmSerializer
-#   def patch(self, request, uidb64, token):
-#     serializer = self.get_serializer(data=request.data, context={'request': request, 'uidb64': uidb64, 'token': token})
-#     serializer.is_valid(raise_exception=True)
-#     return Response({
-#       'message': 'Password reset successful'
-#     }, status=status.HTTP_200_OK) 
-    
+
     
 class PasswordResetConfirm(GenericAPIView):
-  print("====================")
-  print("====================")
-  print("====================")
-  print("====================")
 
   def get(self, request, uidb64, token):
     try:
