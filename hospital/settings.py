@@ -33,7 +33,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'social_accounts'
+    'social_accounts',
+    'doctor'
 ]
 
 MIDDLEWARE = [
