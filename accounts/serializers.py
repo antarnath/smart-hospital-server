@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from django.contrib.auth import authenticate
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from django.utils.encoding import smart_bytes, smart_str, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -73,29 +73,33 @@ class PasswordResetRequestSerializer(serializers.ModelSerializer):
     
   def validate(self, attrs):
     email = attrs.get('email') 
-    if User.objects.filter(email=email).exists():
-      user = User.objects.get(email=email)
-      uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
-      token = PasswordResetTokenGenerator().make_token(user)
-      request = self.context.get('request')
-      current_site = get_current_site(request).domain
-      relative_link = reverse(
-        'password-reset-confirm', 
-        kwargs={'uidb64': uidb64, 'token': token}
-      )
-      print(current_site)
-      current_site = 'localhost:5173'
-      relative_link = '/password-reset-confirm/' + uidb64 + '/' + token + '/'
-      abslink = f"http://{current_site}{relative_link}"
-      email_body = f"Hi {user.first_name} use the link below to reset your password \n {abslink}"
-      data = {
-        'email_body': email_body,
-        'email_subject': 'Reset your password', 
-        'to_email': user.email
-      }
-      send_normal_email(data)
-      attrs['uidb64'] = uidb64
-      attrs['token'] = token
+    print(email)
+    print("=============================")
+    if not User.objects.filter(email=email).exists():
+      raise serializers.ValidationError({'email': 'User with email does not exist'})
+    user = User.objects.get(email=email)
+    uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+    token = PasswordResetTokenGenerator().make_token(user)
+    
+    request = self.context.get('request')
+    current_site = get_current_site(request).domain
+    relative_link = reverse(
+      'password-reset-confirm', 
+      kwargs={'uidb64': uidb64, 'token': token}
+    )
+    print(current_site)
+    current_site = 'localhost:5173'
+    relative_link = '/password-reset-confirm/' + uidb64 + '/' + token + '/'
+    abslink = f"http://{current_site}{relative_link}"
+    email_body = f"Hi {user.first_name} use the link below to reset your password \n {abslink}"
+    data = {
+      'email_body': email_body,
+      'email_subject': 'Reset your password', 
+      'to_email': user.email
+    }
+    send_normal_email(data)
+    attrs['uidb64'] = uidb64
+    attrs['token'] = token
     return attrs
   def to_representation(self, instance):
     ret = super().to_representation(instance)

@@ -2,8 +2,12 @@ from django.contrib import admin
 from doctor.models import *
 # Register your models here.
 
-admin.site.register(specialities)
+class SpecialitiesAdmin(admin.ModelAdmin):
+  list_display = ['id', 'name']
+admin.site.register(Specialities, SpecialitiesAdmin)
 
-admin.site.register(doctor)
+class DoctorAdmin(admin.ModelAdmin):
+  list_display = ['id', 'name']
+admin.site.register(Doctor, DoctorAdmin)
 
-admin.site.register(dr_service_schedule)
+admin.site.register(Dr_service_schedule)
