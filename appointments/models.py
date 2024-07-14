@@ -11,3 +11,9 @@ class Appointment(models.Model):
   services = models.ForeignKey(Specialities, on_delete=models.CASCADE)
   date = models.DateField()
   
+  
+  
+class PaymentGateWaySettings(models.Model):
+    store_id = models.CharField(max_length=500, blank=True, null=True)
+    store_pass = models.CharField(max_length=500, blank=True, null = True)
+  
