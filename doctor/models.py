@@ -17,7 +17,7 @@ class Doctor(models.Model):
     image = models.ImageField(upload_to='doctor/images/')
     description = models.TextField()
     education = models.TextField()
-    pasaing_year = models.CharField(max_length=4)
+    passing_year = models.CharField(max_length=4)
     experience = models.CharField(max_length=2)
     fee = models.IntegerField()
     status = models.BooleanField(default=True)
@@ -38,3 +38,4 @@ class Dr_service_schedule(models.Model):
 
     def __str__(self):
         return self.doctor.name
+

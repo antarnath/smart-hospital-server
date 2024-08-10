@@ -16,31 +16,39 @@ class AppointmentSerializer(serializers.ModelSerializer):
     name = data.get('name')
     phone_number = data.get('phone_number')
     request = self.context.get('request')
+    doctor_info = Doctor.objects.filter(id=doctor.pk).first()
+    cnt = Appointment.objects.filter(doctor=doctor, date=date, verify=True).count()
+    if cnt >= 50:
+      raise ValidationError('Doctor is not available')
+    
     # Check if the appointment already exists
     if Appointment.objects.filter(doctor=doctor, services=services, patient=request.user, date=date).exists():
         raise ValidationError('You have already booked an appointment')
     sp = Specialities.objects.filter(id=services.pk).first()
     
     # Increment doctor's number of patients
-    doctor_info = Doctor.objects.filter(id=doctor.pk).first()
-    if doctor_info.speciality.pk != sp.pk:
+    
+    if doctor_info.speciality.pk != sp.pk: 
       raise ValidationError('Doctor is not available for this service')
     
     doctor_info.number_of_patients += 1
     doctor_info.save()
     serial_number = doctor_info.number_of_patients
     
-    # appointment = Appointment.objects.create(
-    #   name = name,
-    #   phone_number = phone_number,
-    #   doctor = doctor,
-    #   services = services,
-    #   patient = request.user,
-    #   date = date,
-    # )
-
+    appointment = Appointment.objects.create(
+      name = name,
+      phone_number = phone_number,
+      doctor = doctor,
+      services = services,
+      patient = request.user,
+      date = date,
+    )
+    
+    print(appointment.id)
+    data['appointment_id'] = appointment.id
     data['serial_number'] = serial_number
     data['doctor_info'] = {
+      'id': doctor_info.id,
       'name': doctor_info.name,
       'speciality': doctor_info.speciality.name,
       'email': doctor_info.email,
@@ -49,7 +57,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
       'image': doctor_info.image.url,
       'description': doctor_info.description,
       'education': doctor_info.education,
-      'passing_year': doctor_info.pasaing_year,
+      'passing_year': doctor_info.passing_year,
       'experience': doctor_info.experience,
       'fee': doctor_info.fee,
       'status': doctor_info.status,
@@ -60,4 +68,18 @@ class AppointmentSerializer(serializers.ModelSerializer):
     data = super().to_representation(instance)
     data['serial_number'] = self.validated_data.get('serial_number')
     data['doctor_info'] = self.validated_data.get('doctor_info')
+    data['appointment_id'] = self.validated_data.get('appointment_id')
+    return data
+
+
+
+class PaymentSuccessSerializer(serializers.Serializer):
+  def validate(self, data):
+    print("==========================")
+    print(data)
+    user = data.get('value_a')
+    amount = data.get('value_b')
+    appointment = data.get('value_c')
+    doctor = data.get('value_d')
+    print(user, amount, appointment, doctor) 
     return data

@@ -8,7 +8,7 @@ def unique_transaction_id_generator(size=10, chars=string.ascii_uppercase + stri
     return ''.join(random.choice(chars) for _ in range(size))
 
 
-def sslcommerz_payment_gateway(request, name, grand_total):
+def sslcommerz_payment_gateway(request, user, amount, appointment, doctor):
     gateway_auth_details = PaymentGateWaySettings.objects.all().first()
     
     settings = {'store_id': gateway_auth_details.store_id,
@@ -16,10 +16,10 @@ def sslcommerz_payment_gateway(request, name, grand_total):
     
     sslcommez = SSLCOMMERZ(settings)
     post_body = {}
-    post_body['total_amount'] = grand_total
+    post_body['total_amount'] = amount
     post_body['currency'] = "BDT"
     post_body['tran_id'] = unique_transaction_id_generator()
-    post_body['success_url'] = ''
+    post_body['success_url'] = 'http://127.0.0.1:8000/api/v1/appointments/payment/success/'
     post_body['fail_url'] = ''
     post_body['cancel_url'] = ''
     post_body['emi_option'] = 0
@@ -36,7 +36,10 @@ def sslcommerz_payment_gateway(request, name, grand_total):
     post_body['product_profile'] = "general"
 
     # OPTIONAL PARAMETERS
-    post_body['value_a'] = name
+    post_body['value_a'] = user
+    post_body['value_b'] = amount
+    post_body['value_c'] = appointment
+    post_body['value_d'] = doctor
 
     response = sslcommez.createSession(post_body)
     
