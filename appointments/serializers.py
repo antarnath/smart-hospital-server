@@ -74,6 +74,18 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
 
 class PaymentSuccessSerializer(serializers.Serializer):
+  tran_id = serializers.CharField(required=True)
+  val_id = serializers.CharField(required=True)
+  amount = serializers.CharField(required=True)
+  card_type = serializers.CharField(required=True)
+  store_amount = serializers.CharField(required=True)
+  status = serializers.CharField(required=True)
+  tran_date = serializers.CharField(required=True)
+  currency = serializers.CharField(required=True)
+  value_a = serializers.CharField(required=True)
+  value_b = serializers.CharField(required=True)
+  value_c = serializers.CharField(required=True)
+  value_d = serializers.CharField(required=True)
   def validate(self, data):
     print("==========================")
     print(data)

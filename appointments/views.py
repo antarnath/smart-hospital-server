@@ -45,6 +45,8 @@ class Payment_success(GenericAPIView):
   serializer_class = PaymentSuccessSerializer
   
   def post(self, request):
+    print("=======from view=====")
+    print(request.data)
     serializer = self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     return Response(serializer.data)

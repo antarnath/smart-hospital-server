@@ -48,3 +48,10 @@ class OneTimePassword(models.Model):
   
   def __str__(self):
     return f'{self.user.first_name}--passcode'
+  
+class OneTimePasswordForForgetPassword(models.Model):
+  user = models.OneToOneField(User, on_delete=models.CASCADE)
+  code = models.CharField(max_length=6, unique=True)
+  
+  def __str__(self):
+    return f'{self.user.first_name}--passcode'

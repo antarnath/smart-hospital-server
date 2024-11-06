@@ -9,13 +9,16 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import smart_bytes, smart_str, DjangoUnicodeDecodeError
-
+import random
+from django.conf import settings
+from django.core.mail import EmailMessage
 
 class RegisterUser(GenericAPIView):
   serializer_class = UserRegisterSerializers
   
   def post(self, request):
     serializer = self.get_serializer(data=request.data)
+    print(serializer)
     if serializer.is_valid():
       serializer.save()
       user = serializer.data
@@ -56,7 +59,7 @@ class LoginUser(GenericAPIView):
     serializer = self.get_serializer(data=request.data)
     if serializer.is_valid():
       return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
   
 class UserProfile(GenericAPIView):
   permission_classes = [IsAuthenticated]
@@ -70,39 +73,63 @@ class UserProfile(GenericAPIView):
           'user': serializer.data
       }, status=status.HTTP_200_OK)
     
-class PasswordResetRequest(GenericAPIView):  
-  serializer_class = PasswordResetRequestSerializer
-  
-  def post(self, request):
-    serializer = self.get_serializer(data=request.data, context = {'request': request}) 
+    
+def generateOtp():
+  otp = ""
+  for i in range(6):
+    otp += str(random.randint(1, 9))
+  return otp
+class ForgetPassword(GenericAPIView):
+  serializer_class = ForgotPasswordSerializer
+
+  def post(self, request, *args, **kwargs):
+    serializer = self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    return Response({
-      'data': serializer.data, 
-      'message': 'Password reset link sent to your email'
-    }, status=status.HTTP_200_OK)
+      
+    email = serializer.validated_data['email']
+    user = User.objects.get(email=email)
     
-
+    otp = generateOtp()
+    OneTimePasswordForForgetPassword.objects.create(user=user, code=otp)
     
-class PasswordResetConfirm(GenericAPIView):
-
-  def get(self, request, uidb64, token):
+    subject = "Forget Password"
+    email_body = f'Hi {user.first_name} This is your OTP {otp}'
+    from_email = settings.DEFAULT_FROM_EMAIL
+    
+    send_email = EmailMessage(
+      subject=subject,
+      body=email_body,
+      from_email=from_email,
+      to=[email]
+    )
+    send_email.send(fail_silently=True)
+    
+    return Response({"message": "OTP sent to email successfully."}, status=status.HTTP_200_OK)
+    
+    
+class ForgetPasswordVerify(GenericAPIView):
+  def post(self, request, email):
+    otp = request.data.get('otp')
+    user = User.objects.get(email=email)
     try:
-      user_id = smart_str(urlsafe_base64_decode(uidb64))
-      user = User.objects.get(id=user_id)
-      if not PasswordResetTokenGenerator().check_token(user, token):
-        return Response(
-          {'message': 'Token is invalid or expired. Please request a new one'},
-          status=status.HTTP_400_BAD_REQUEST
-        )
-      return Response(
-        {'success': True, 'message': 'Credentials Valid', 'uidb64': uidb64, 'token': token},
-        status=status.HTTP_200_OK
-      )
-    except DjangoUnicodeDecodeError as identifier:
-      return Response(
-        {'message': 'Token is invalid or expired. Please request a new one'},
-        status=status.HTTP_400_BAD_REQUEST
-      )
+      otp_obj = OneTimePasswordForForgetPassword.objects.get(user=user)
+    except OneTimePasswordForForgetPassword.DoesNotExist:
+      return Response({
+        'message': 'No OTP found'
+      }, status=status.HTTP_400_BAD_REQUEST)
+      
+    if otp == otp_obj.code:
+      otp_obj.delete()
+      return Response({
+        'message': 'OTP Verified',
+        'email': email
+      }, status=status.HTTP_200_OK)
+    else:
+      return Response({
+        'message': 'Invalid OTP'
+      }, status=status.HTTP_400_BAD_REQUEST)
+    
+
       
 class SetNewPassword(GenericAPIView):
   serializer_class = SetNewPasswordSerializer

@@ -6,7 +6,7 @@ urlpatterns = [
   path('verify/<str:email>/', VerifyUserEmail.as_view(), name='verify'),
   path('login/', LoginUser.as_view(), name='login'),
   path('profile/', UserProfile.as_view(), name='profile'), 
-  path('password-reset/', PasswordResetRequest.as_view(), name='password-reset'),
-  path('password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirm.as_view(), name='password-reset-confirm'),
+  path('forget-password/', ForgetPassword.as_view(), name='forget-password'), 
+  path('forget-password-verify/<str:email>/', ForgetPasswordVerify.as_view(), name='forget-password-verify'),
   path('set-new-password/', SetNewPassword.as_view(), name='set-new-password'),
 ] 
