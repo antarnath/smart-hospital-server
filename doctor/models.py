@@ -1,6 +1,16 @@
 from django.db import models
 
 
+class Hospital(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=30)
+    phone = models.CharField(max_length=15)
+    location = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
+    description = models.CharField(max_length=100)
+    
+
+
 class Specialities(models.Model):
     name = models.CharField(max_length=100)
 
@@ -10,12 +20,11 @@ class Specialities(models.Model):
 
 class Doctor(models.Model):
     name = models.CharField(max_length=100)
+    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, default=1)
     speciality = models.ForeignKey(Specialities, on_delete=models.CASCADE)
     email = models.EmailField(max_length=100)
     phone = models.CharField(max_length=15)
-    address = models.TextField()
     image = models.ImageField(upload_to='doctor/images/')
-    description = models.TextField()
     education = models.TextField()
     passing_year = models.CharField(max_length=4)
     experience = models.CharField(max_length=2)

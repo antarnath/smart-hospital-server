@@ -9,5 +9,7 @@ admin.site.register(Specialities, SpecialitiesAdmin)
 class DoctorAdmin(admin.ModelAdmin):
   list_display = ['id', 'name']
 admin.site.register(Doctor, DoctorAdmin)
-
+ 
 admin.site.register(Dr_service_schedule)
+
+admin.site.register(Hospital)
