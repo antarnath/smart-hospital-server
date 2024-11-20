@@ -7,14 +7,11 @@ from django.core.serializers import serialize
 class AppointmentSerializer(serializers.ModelSerializer):
   class Meta:
     model = Appointment
-    fields = ['name', 'doctor', 'services', 'phone_number', 'date']
+    fields = ['doctor','date']
   
   def validate(self, data):
     doctor = data.get('doctor')
-    services = data.get('services')
     date = data.get('date')
-    name = data.get('name')
-    phone_number = data.get('phone_number')
     request = self.context.get('request')
     doctor_info = Doctor.objects.filter(id=doctor.pk).first()
     cnt = Appointment.objects.filter(doctor=doctor, date=date, verify=True).count()
@@ -22,24 +19,16 @@ class AppointmentSerializer(serializers.ModelSerializer):
       raise ValidationError('Doctor is not available')
     
     # Check if the appointment already exists
-    if Appointment.objects.filter(doctor=doctor, services=services, patient=request.user, date=date).exists():
+    if Appointment.objects.filter(doctor=doctor, patient=request.user, date=date).exists():
         raise ValidationError('You have already booked an appointment')
-    sp = Specialities.objects.filter(id=services.pk).first()
     
-    # Increment doctor's number of patients
-    
-    if doctor_info.speciality.pk != sp.pk: 
-      raise ValidationError('Doctor is not available for this service')
     
     doctor_info.number_of_patients += 1
     doctor_info.save()
     serial_number = doctor_info.number_of_patients
     
     appointment = Appointment.objects.create(
-      name = name,
-      phone_number = phone_number,
       doctor = doctor,
-      services = services,
       patient = request.user,
       date = date,
     )
@@ -53,9 +42,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
       'speciality': doctor_info.speciality.name,
       'email': doctor_info.email,
       'phone': doctor_info.phone,
-      'address': doctor_info.address,
       'image': doctor_info.image.url,
-      'description': doctor_info.description,
       'education': doctor_info.education,
       'passing_year': doctor_info.passing_year,
       'experience': doctor_info.experience,

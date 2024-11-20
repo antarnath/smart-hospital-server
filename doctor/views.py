@@ -43,7 +43,7 @@ class SearchView(APIView):
     response_data = {
       "hospitals": HospitalSerializer(hospitals, many=True).data,
       "doctors": DoctorSerializer(doctors, many=True).data,
-      "doctors_by_speciality": DoctorSerializer(doctors_by_speciality, many=True).data, 
+      "specialities": SpecialitiesSerializer(specialities, many=True).data
     }
 
     return Response(response_data, status=status.HTTP_200_OK)
