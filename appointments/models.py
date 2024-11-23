@@ -9,6 +9,10 @@ class Appointment(models.Model):
   patient = models.ForeignKey(User, on_delete=models.CASCADE)
   date = models.DateField()
   verify = models.BooleanField(default=False)
+  prescription = models.ImageField(upload_to='prescription/', blank=True, null=True)
+  report = models.ImageField(upload_to='report/', blank=True, null=True)
+  
+# 
   
   
 class Payment(models.Model):

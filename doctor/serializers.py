@@ -18,7 +18,7 @@ class DoctorSerializer(serializers.ModelSerializer):
     fields = '__all__'
     
     
-from rest_framework_simplejwt.tokens import RefreshToken
+# from rest_framework_simplejwt.tokens import RefreshToken
 
 
 # class LoginSerializer(serializers.ModelSerializer):

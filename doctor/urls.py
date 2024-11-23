@@ -9,4 +9,5 @@ urlpatterns = [
   path('all-doctor/', AllDoctor.as_view(), name='all-doctor'), 
   path('doctor-by-hospital/<int:id>/', DoctorsByHospital.as_view(), name='doctor-by-hospital'),
   path('doctor-by-speciality/<int:id>/', DoctorsBySpeciality.as_view(), name='doctor-by-speciality'),
+  path('find-single-doctor/<int:id>/', FindSingleDoctor.as_view(), name='find-single-doctor'),
 ] 

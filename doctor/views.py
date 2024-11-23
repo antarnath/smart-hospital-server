@@ -101,3 +101,16 @@ class DoctorsBySpeciality(APIView):
       "doctors": DoctorSerializer(doctors, many=True).data,
     }
     return Response(response_data, status=status.HTTP_200_OK)
+  
+  
+class FindSingleDoctor(APIView):
+  def get(self, request, id, *args, **kwargs):
+    try:
+      doctor = Doctor.objects.get(id=id)
+    except Doctor.DoesNotExist:
+      return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    response_data = {
+      "doctor": DoctorSerializer(doctor).data,
+    }
+    return Response(response_data, status=status.HTTP_200_OK)
