@@ -47,3 +47,57 @@ class SearchView(APIView):
     }
 
     return Response(response_data, status=status.HTTP_200_OK)
+
+class AllHospital(APIView):
+  def get(self, request, *args, **kwargs):
+    hospitals = Hospital.objects.all()
+    response_data = {
+      "hospitals": HospitalSerializer(hospitals, many=True).data,
+    }
+
+    return Response(response_data, status=status.HTTP_200_OK)
+  
+class AllSpecialities(APIView):
+  def get(self, request, *args, **kwargs):
+    specialities = Specialities.objects.all()
+    response_data = {
+      "specialities": SpecialitiesSerializer(specialities, many=True).data,
+    }
+
+    return Response(response_data, status=status.HTTP_200_OK)
+  
+class AllDoctor(APIView):
+  def get(self, request, *args, **kwargs):
+    doctors = Doctor.objects.all()
+    response_data = {
+      "doctors": DoctorSerializer(doctors, many=True).data,
+    }
+
+    return Response(response_data, status=status.HTTP_200_OK)
+  
+  
+class DoctorsByHospital(APIView):
+  def get(self, request, id, *args, **kwargs):
+    try:
+      hospital = Hospital.objects.get(id=id)
+    except Hospital.DoesNotExist:
+      return Response({"error": "Hospital not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    doctors = Doctor.objects.filter(hospital=hospital)
+    response_data = {
+      "doctors": DoctorSerializer(doctors, many=True).data,
+    }
+    return Response(response_data, status=status.HTTP_200_OK)
+    
+class DoctorsBySpeciality(APIView):
+  def get(self, request, id, *args, **kwargs):
+    try:
+      speciality = Specialities.objects.get(id=id)
+    except Specialities.DoesNotExist:
+      return Response({"error": "Speciality not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    doctors = Doctor.objects.filter(speciality=speciality)
+    response_data = {
+      "doctors": DoctorSerializer(doctors, many=True).data,
+    }
+    return Response(response_data, status=status.HTTP_200_OK)
