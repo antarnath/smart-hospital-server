@@ -1,6 +1,11 @@
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -89,17 +94,17 @@ CSRF_TRUSTED_ORIGINS = [
 #     }
 # }
 
-
 DATABASES = {
     'default': {
-        'ENGINE': config('ENGINE'),
-        'NAME': config('NAME'),
-        'USER': config('USER'),
-        'PASSWORD': config('PASSWORD'),
-        'HOST': config('HOST'),
-        'PORT': config('PORT'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'bpfmkwo9wnoelpvx7jf0-postgresql.services.clever-cloud.com',
+        'NAME': 'bpfmkwo9wnoelpvx7jf0',
+        'USER': 'uwacutahp1ixliatkw4f',
+        'PASSWORD': '22nnVz5UvUNWFHUbcUUGAMl8oi23Sp',
+        'PORT': '50013',
     }
 }
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

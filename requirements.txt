@@ -23,7 +23,6 @@ protobuf==4.25.3
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
 PyJWT==2.8.0
-PyMySQL==1.1.1
 pyotp==2.9.0
 pyparsing==3.1.2
 python-decouple==3.8
@@ -36,4 +35,3 @@ sslcommerz-lib==1.0
 tzdata==2024.1
 uritemplate==4.1.1
 urllib3==2.2.1
-mysqlclient==2.2.5
